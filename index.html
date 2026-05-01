@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lamplighter — Your light, always with you</title>
+<meta name="description" content="Spiritual guidance and emotional support through WhatsApp. Faith-aligned, empathetic, always present.">
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00C9B1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lamplighter">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Lamplighter — Your light, always with you">
+<meta property="og:description" content="Spiritual guidance and emotional support through WhatsApp.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lamplighter.app">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   TOKENS
+============================================================ */
+:root {
+  --bg:        #0B0C18;
+  --bg2:       #0F1020;
+  --bg3:       #141528;
+  --surface:   rgba(255,255,255,0.04);
+  --surface2:  rgba(255,255,255,0.07);
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.14);
+
+  --teal:      #00C9B1;
+  --violet:    #9B6FD4;
+  --mid:       #6B7FD4;
+  --teal-dim:  rgba(0,201,177,0.12);
+  --violet-dim:rgba(155,111,212,0.12);
+
+  --white:     #FFFFFF;
+  --text:      rgba(255,255,255,0.92);
+  --text-mid:  rgba(255,255,255,0.55);
+  --text-soft: rgba(255,255,255,0.30);
+
+  --grad: linear-gradient(135deg, #00C9B1 0%, #6B7FD4 50%, #9B6FD4 100%);
+  --grad-h: linear-gradient(90deg, #00C9B1 0%, #9B6FD4 100%);
+  --grad-v: linear-gradient(180deg, #9B6FD4 0%, #00C9B1 100%);
+
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 28px;
+  --r-xl: 40px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Noise grain overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.028;
+}
+
+/* ============================================================
+   ANIMATIONS
+============================================================ */
+@keyframes rise   { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes float  { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+@keyframes spin-slow { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@keyframes orb-a { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(30px,-20px) scale(1.08); } }
+@keyframes orb-b { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(-20px,25px) scale(0.94); } }
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,201,177,0.3); }
+  50%      { box-shadow: 0 0 0 16px rgba(0,201,177,0); }
+}
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ============================================================
+   NAV
+============================================================ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 48px;
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(11,12,24,0.82);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+
+.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+
+/* Inline SVG logo mark */
+.logo-mark { flex-shrink:0; }
+
+.nav-name {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.4px; color: var(--white);
+}
+
+.nav-links { display:flex; align-items:center; gap:36px; list-style:none; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--text-mid);
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+
+.nav-btn {
+  display: inline-flex; align-items:center; gap:8px;
+  padding: 10px 22px; border-radius: 100px;
+  background: var(--grad);
+  font-size: 14px; font-weight: 700; color: var(--bg);
+  text-decoration: none; border:none; cursor:pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  animation: pulse-glow 3s ease-in-out 2s infinite;
+}
+.nav-btn:hover { opacity:0.88; transform:translateY(-1px); }
+
+@media (max-width:768px) {
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction:column; align-items:center; justify-content:center;
+  padding: 120px 24px 80px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+/* Background orbs */
+.orb {
+  position: absolute; border-radius:50%; filter:blur(80px);
+  pointer-events:none;
+}
+.orb-1 { width:500px; height:500px; background:rgba(0,201,177,0.09); top:-120px; right:-80px; animation:orb-a 14s ease-in-out infinite; }
+.orb-2 { width:400px; height:400px; background:rgba(155,111,212,0.09); bottom:-80px; left:-60px; animation:orb-b 16s ease-in-out infinite; }
+.orb-3 { width:300px; height:300px; background:rgba(107,127,212,0.06); top:40%; left:55%; animation:orb-a 10s ease-in-out 3s infinite; }
+
+/* Hero logo mark — large, floating */
+.hero-mark {
+  margin: 0 auto 48px;
+  animation: rise 1s ease-out forwards, float 6s ease-in-out 1s infinite;
+  opacity: 0;
+}
+
+.hero-badge {
+  display: inline-flex; align-items:center; gap:8px;
+  padding: 7px 18px; border-radius:100px;
+  border: 1px solid rgba(0,201,177,0.3);
+  background: rgba(0,201,177,0.08);
+  font-size: 13px; font-weight: 600; color: var(--teal);
+  margin-bottom: 28px;
+  opacity:0; animation: rise 0.8s ease-out 0.2s forwards;
+}
+
+.hero-badge-dot {
+  width:7px; height:7px; border-radius:50%; background:var(--teal);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.hero-h1 {
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 800; letter-spacing: -3px; line-height: 1.0;
+  color: var(--white); margin-bottom: 10px;
+  opacity:0; animation: rise 0.8s ease-out 0.3s forwards;
+}
+
+.hero-h1 em {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic; font-weight: 400; letter-spacing: -1px;
+  background: var(--grad-h);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px); font-weight: 400; line-height: 1.75;
+  color: var(--text-mid); max-width: 520px; margin: 24px auto 44px;
+  opacity:0; animation: rise 0.8s ease-out 0.45s forwards;
+}
+
+.hero-actions {
+  display:flex; align-items:center; gap:14px; justify-content:center; flex-wrap:wrap;
+  opacity:0; animation: rise 0.8s ease-out 0.6s forwards;
+}
+
+.btn-primary {
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 16px 36px; border-radius:100px;
+  background: var(--grad); color: var(--bg);
+  font-size: 15px; font-weight: 700;
+  text-decoration:none; border:none; cursor:pointer;
+  transition: all 0.25s; box-shadow: 0 8px 32px rgba(0,201,177,0.2);
+}
+.btn-primary:hover { transform:translateY(-3px); box-shadow:0 16px 48px rgba(0,201,177,0.3); }
+
+.btn-ghost {
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 15px 28px; border-radius:100px;
+  background: transparent; color: var(--text-mid);
+  font-size: 15px; font-weight: 500;
+  text-decoration:none; border:1.5px solid var(--border2); cursor:pointer;
+  transition: all 0.25s;
+}
+.btn-ghost:hover { border-color:rgba(255,255,255,0.3); color:var(--white); }
+
+/* Faith path pills */
+.paths {
+  display:flex; justify-content:center; flex-wrap:wrap; gap:10px;
+  margin-top: 56px;
+  opacity:0; animation: rise 0.8s ease-out 0.75s forwards;
+}
+
+.path-pill {
+  display:flex; align-items:center; gap:8px;
+  padding: 8px 18px; border-radius:100px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  font-size: 13px; font-weight: 500; color: var(--text-mid);
+  transition: all 0.25s; cursor:default;
+}
+.path-pill:hover {
+  border-color: var(--teal); color:var(--white);
+  background: var(--teal-dim);
+}
+
+.path-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ============================================================
+   STATS STRIP
+============================================================ */
+.stats-strip {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 48px;
+  display:flex; align-items:center; justify-content:center; gap:64px; flex-wrap:wrap;
+}
+
+.stat { text-align:center; }
+
+.stat-num {
+  font-size: 28px; font-weight: 800; letter-spacing:-1px;
+  background: var(--grad-h);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  display:block;
+}
+
+.stat-label { font-size:13px; font-weight:400; color:var(--text-soft); margin-top:2px; }
+
+/* ============================================================
+   SECTIONS SHARED
+============================================================ */
+.section { padding: 100px 24px; max-width:1100px; margin:0 auto; }
+
+.eyebrow {
+  display:block; text-align:center;
+  font-size:11px; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+  background: var(--grad-h);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:16px;
+}
+
+.section-h {
+  font-size: clamp(28px,4vw,48px); font-weight:800;
+  letter-spacing:-1.5px; line-height:1.08;
+  color:var(--white); text-align:center; margin-bottom:14px;
+}
+
+.section-sub {
+  font-size:17px; font-weight:400; line-height:1.75;
+  color:var(--text-mid); text-align:center;
+  max-width:480px; margin:0 auto 64px;
+}
+
+/* ============================================================
+   FEATURES
+============================================================ */
+.feat-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:2px;
+}
+@media(max-width:700px) { .feat-grid { grid-template-columns:1fr; } }
+
+.feat-card {
+  padding: 44px 40px;
+  background: var(--surface);
+  border:1px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+  position:relative; overflow:hidden;
+}
+.feat-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: var(--grad-h); opacity:0;
+  transition: opacity 0.3s;
+}
+.feat-card:hover { background:var(--surface2); border-color:var(--border2); }
+.feat-card:hover::before { opacity:1; }
+
+.feat-card.wide { grid-column:span 2; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+@media(max-width:700px) { .feat-card.wide { grid-column:span 1; grid-template-columns:1fr; } }
+
+.feat-icon {
+  width:48px; height:48px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; margin-bottom:22px;
+  background: var(--surface2);
+  border:1px solid var(--border);
+}
+
+.feat-card h3 {
+  font-size:20px; font-weight:700; letter-spacing:-0.4px;
+  color:var(--white); margin-bottom:12px;
+}
+
+.feat-card p { font-size:15px; font-weight:400; line-height:1.8; color:var(--text-mid); }
+
+/* Mini chat preview inside feat card */
+.mini-chat {
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  overflow:hidden;
+}
+.mini-chat-top {
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.mini-chat-avatar {
+  width:30px; height:30px; border-radius:50%;
+  background: var(--grad); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.mini-chat-name { font-size:13px; font-weight:700; color:var(--white); }
+.mini-chat-online { font-size:11px; color:var(--teal); }
+.mini-chat-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.bubble-in {
+  max-width:80%;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px 14px 14px 14px;
+  padding:10px 14px; font-size:13px; line-height:1.65; color:var(--text);
+}
+.bubble-out {
+  max-width:85%; align-self:flex-end;
+  background: linear-gradient(135deg,rgba(0,201,177,0.18),rgba(155,111,212,0.18));
+  border:1px solid rgba(0,201,177,0.2);
+  border-radius:14px 4px 14px 14px;
+  padding:10px 14px; font-size:13px; line-height:1.65; color:var(--text);
+  font-style:italic;
+}
+
+/* ============================================================
+   CONVERSATIONS
+============================================================ */
+.convo-section {
+  background: var(--bg2);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:100px 24px;
+}
+.convo-inner { max-width:820px; margin:0 auto; }
+
+.tab-row { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:36px; }
+
+.tab {
+  padding:10px 22px; border-radius:100px;
+  border:1.5px solid var(--border2); background:transparent;
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:13px; font-weight:600; color:var(--text-mid);
+  cursor:pointer; transition:all 0.2s;
+}
+.tab:hover { border-color:var(--teal); color:var(--white); }
+.tab.active {
+  background:var(--grad); color:var(--bg);
+  border-color:transparent; font-weight:700;
+}
+
+.phone-shell {
+  max-width:380px; margin:0 auto;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:36px;
+  overflow:hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.phone-bar {
+  padding:16px 20px 14px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+}
+
+.phone-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--grad); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.phone-info-name { font-size:14px; font-weight:700; color:var(--white); }
+.phone-info-status { font-size:11px; color:var(--teal); font-weight:500; }
+
+.phone-msgs {
+  padding:24px 18px;
+  display:flex; flex-direction:column; gap:14px;
+  min-height:380px;
+  background: linear-gradient(180deg, var(--bg3) 0%, var(--bg2) 100%);
+}
+
+.msg-in {
+  max-width:80%;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px 18px 18px 18px;
+  padding:12px 16px; font-size:14px; line-height:1.7; color:var(--text);
+}
+
+.msg-out {
+  max-width:85%; align-self:flex-end;
+  background:linear-gradient(135deg,rgba(0,201,177,0.16),rgba(155,111,212,0.16));
+  border:1px solid rgba(0,201,177,0.25);
+  border-radius:18px 4px 18px 18px;
+  padding:12px 16px; font-size:14px; line-height:1.7; color:var(--text);
+  font-style:italic;
+}
+
+.phone-input-row {
+  padding:14px 18px;
+  border-top:1px solid var(--border);
+  display:flex; gap:10px; align-items:center;
+  background:var(--bg2);
+}
+
+.phone-input-box {
+  flex:1; padding:10px 16px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:100px; font-size:13px; color:var(--text-soft);
+  font-family:'Bricolage Grotesque',sans-serif; font-style:italic;
+}
+
+.phone-send-btn {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  background:var(--grad); display:flex; align-items:center; justify-content:center;
+  font-size:14px; color:var(--bg);
+}
+
+.convo-panel { display:none; flex-direction:column; gap:14px; }
+.convo-panel.active { display:flex; }
+
+/* ============================================================
+   HOW IT WORKS
+============================================================ */
+.steps-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:2px;
+}
+@media(max-width:700px) { .steps-grid { grid-template-columns:1fr; } }
+
+.step-card {
+  padding:48px 36px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  transition: background 0.3s;
+  position:relative;
+}
+.step-card:hover { background:var(--surface2); }
+
+.step-num {
+  font-size:72px; font-weight:800; letter-spacing:-4px;
+  line-height:1; display:block; margin-bottom:24px;
+  background: var(--grad-h);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; opacity:0.2;
+}
+
+.step-icon {
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  background:var(--surface2); border:1px solid var(--border);
+  margin-bottom:20px;
+}
+
+.step-card h3 { font-size:18px; font-weight:700; color:var(--white); margin-bottom:12px; letter-spacing:-0.3px; }
+.step-card p  { font-size:14px; line-height:1.8; color:var(--text-mid); }
+
+/* ============================================================
+   TESTIMONIALS
+============================================================ */
+.testi-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:2px;
+}
+@media(max-width:768px) { .testi-grid { grid-template-columns:1fr; } }
+
+.testi-card {
+  padding:40px 36px;
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; flex-direction:column; gap:20px;
+  transition:background 0.3s;
+}
+.testi-card:hover { background:var(--surface2); }
+
+.testi-stars {
+  background:var(--grad-h);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; font-size:16px; letter-spacing:3px;
+}
+
+.testi-card blockquote {
+  font-family:'DM Serif Display',serif;
+  font-size:18px; font-style:italic; line-height:1.7;
+  color:var(--text); flex:1;
+}
+
+.testi-author {
+  display:flex; align-items:center; gap:12px;
+  padding-top:16px; border-top:1px solid var(--border);
+}
+
+.testi-av {
+  width:38px; height:38px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; flex-shrink:0;
+  border:1px solid var(--border);
+}
+
+.testi-name { font-size:14px; font-weight:600; color:var(--white); }
+.testi-meta { font-size:12px; color:var(--text-soft); margin-top:2px; }
+
+/* ============================================================
+   REGISTRATION
+============================================================ */
+.reg-section {
+  padding:100px 24px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,201,177,0.07) 0%, transparent 60%);
+}
+
+.reg-card {
+  max-width:540px; margin:0 auto;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:var(--r-lg);
+  padding:56px 52px;
+  position:relative;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+}
+/* Gradient top edge */
+.reg-card::before {
+  content:''; position:absolute; top:-1px; left:20px; right:20px; height:1px;
+  background:var(--grad-h);
+}
+
+@media(max-width:600px) { .reg-card { padding:36px 24px; } }
+
+.reg-title { font-size:26px; font-weight:800; letter-spacing:-0.8px; color:var(--white); text-align:center; margin-bottom:6px; }
+.reg-sub { font-size:15px; color:var(--text-soft); text-align:center; margin-bottom:40px; }
+
+.form-group { margin-bottom:20px; }
+
+.form-label {
+  display:block; margin-bottom:8px;
+  font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-mid);
+}
+
+.form-input, .form-select {
+  width:100%;
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:14px 18px;
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:15px; color:var(--white);
+  outline:none; transition:all 0.25s;
+  appearance:none;
+}
+.form-input::placeholder { color:var(--text-soft); }
+.form-input:focus, .form-select:focus {
+  border-color:var(--teal);
+  background:rgba(0,201,177,0.06);
+  box-shadow:0 0 0 3px rgba(0,201,177,0.1);
+}
+.form-select option { background:var(--bg2); color:var(--white); }
+
+.sel-wrap { position:relative; }
+.sel-wrap::after {
+  content:'▾'; position:absolute; right:18px; top:50%;
+  transform:translateY(-50%); color:var(--text-soft); pointer-events:none; font-size:12px;
+}
+
+.phone-row { display:flex; gap:10px; }
+.prefix { width:80px; flex-shrink:0; text-align:center; }
+
+/* Belief grid */
+.belief-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
+
+.belief-btn {
+  padding:12px 14px; text-align:center;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:13px; font-weight:500; color:var(--text-mid);
+  cursor:pointer; transition:all 0.2s;
+}
+.belief-btn:hover { border-color:var(--teal); color:var(--white); }
+.belief-btn.sel {
+  border-color:var(--teal); color:var(--teal);
+  background:var(--teal-dim); font-weight:700;
+}
+
+.consent-row {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:14px 16px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
+  margin-bottom:28px;
+}
+.consent-check { width:17px; height:17px; accent-color:var(--teal); flex-shrink:0; margin-top:2px; cursor:pointer; }
+.consent-text { font-size:13px; color:var(--text-soft); line-height:1.6; }
+.consent-text a { color:var(--teal); text-decoration:none; }
+
+.btn-submit {
+  width:100%; padding:17px;
+  background:var(--grad); color:var(--bg);
+  border:none; border-radius:var(--r-sm);
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:16px; font-weight:800; cursor:pointer;
+  transition:all 0.25s;
+}
+.btn-submit:hover { opacity:0.88; transform:translateY(-1px); box-shadow:0 12px 40px rgba(0,201,177,0.25); }
+.btn-submit:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+.trust-row { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:20px; }
+.trust-item { font-size:12px; font-weight:600; color:var(--text-soft); display:flex; align-items:center; gap:5px; }
+
+/* Success state */
+.form-success { display:none; text-align:center; padding:20px 0; }
+.form-success.show { display:block; }
+.success-icon {
+  width:72px; height:72px; border-radius:50%;
+  background:var(--teal-dim); border:1px solid rgba(0,201,177,0.3);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 24px; font-size:32px;
+}
+.success-h { font-size:24px; font-weight:800; color:var(--white); margin-bottom:10px; letter-spacing:-0.5px; }
+.success-p { font-size:15px; color:var(--text-mid); line-height:1.7; }
+
+/* ============================================================
+   SAFETY
+============================================================ */
+.safety {
+  padding:60px 24px;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  text-align:center;
+}
+.safety-inner { max-width:600px; margin:0 auto; }
+.safety-label { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-soft); margin-bottom:16px; display:block; }
+.safety-text { font-size:15px; color:var(--text-mid); line-height:1.8; margin-bottom:20px; }
+.safety-box {
+  padding:18px 24px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
+  font-size:13px; font-weight:500; color:var(--text-mid); line-height:1.8; text-align:left;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer {
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:64px 48px 40px;
+}
+.footer-inner { max-width:1100px; margin:0 auto; }
+
+.footer-top {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:48px; padding-bottom:48px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:32px;
+}
+@media(max-width:768px) { .footer-top { grid-template-columns:1fr; gap:32px; } }
+
+.footer-brand p { font-size:14px; color:var(--text-soft); line-height:1.8; margin-top:16px; max-width:240px; }
+
+.footer-col h5 { font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--white); margin-bottom:18px; }
+.footer-col ul { list-style:none; }
+.footer-col li { margin-bottom:10px; }
+.footer-col a { font-size:14px; color:var(--text-soft); text-decoration:none; transition:color 0.2s; }
+.footer-col a:hover { color:var(--teal); }
+
+.footer-bottom { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.footer-legal { font-size:12px; color:var(--text-soft); }
+.footer-made  { font-size:12px; color:var(--text-soft); }
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.in { opacity:1; transform:translateY(0); }
+
+/* ============================================================
+   LOGO SVG — reusable inline styles
+============================================================ */
+.lamp-svg-mark { display:inline-block; }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAV
+============================================================ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <!-- Inline lamp mark small -->
+    <svg width="36" height="36" viewBox="0 0 36 36" class="logo-mark">
+      <defs>
+        <linearGradient id="nl" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00C9B1"/>
+          <stop offset="100%" stop-color="#9B6FD4"/>
+        </linearGradient>
+      </defs>
+      <circle cx="18" cy="18" r="17" fill="rgba(255,255,255,0.04)" stroke="url(#nl)" stroke-width="1.5"/>
+      <!-- teardrop outer -->
+      <path d="M18 6 C22 9 26 13 26 18 C26 23 22 27 18 28 C14 27 10 23 10 18 C10 13 14 9 18 6Z"
+        fill="url(#nl)" opacity="0.15"/>
+      <path d="M18 6 C22 9 26 13 26 18 C26 23 22 27 18 28 C14 27 10 23 10 18 C10 13 14 9 18 6Z"
+        fill="none" stroke="url(#nl)" stroke-width="1.8" stroke-linecap="round"/>
+      <!-- teardrop inner hollow -->
+      <path d="M18 11 C21 13 23 16 23 19 C23 22 21 24 18 25 C15 24 13 22 13 19 C13 16 15 13 18 11Z"
+        fill="#0F1020"/>
+      <path d="M18 11 C21 13 23 16 23 19 C23 22 21 24 18 25 C15 24 13 22 13 19 C13 16 15 13 18 11Z"
+        fill="none" stroke="url(#nl)" stroke-width="1" opacity="0.4"/>
+      <!-- stem -->
+      <line x1="18" y1="28" x2="18" y2="31" stroke="url(#nl)" stroke-width="2" stroke-linecap="round"/>
+      <!-- collar -->
+      <line x1="14" y1="31" x2="22" y2="31" stroke="url(#nl)" stroke-width="2" stroke-linecap="round"/>
+      <!-- dish top curved -->
+      <path d="M11 33.5 Q18 31.5 25 33.5" fill="none" stroke="url(#nl)" stroke-width="2" stroke-linecap="round"/>
+      <!-- dish bottom -->
+      <line x1="11" y1="35" x2="25" y2="35" stroke="url(#nl)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-name">Lamplighter</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#conversations">See it live</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#register" class="nav-btn">Get started →</a></li>
+  </ul>
+</nav>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Large hero lamp mark -->
+  <div class="hero-mark">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <defs>
+        <linearGradient id="hl" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00C9B1"/>
+          <stop offset="50%" stop-color="#6B7FD4"/>
+          <stop offset="100%" stop-color="#9B6FD4"/>
+        </linearGradient>
+        <linearGradient id="hlv" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#00C9B1"/>
+          <stop offset="100%" stop-color="#9B6FD4"/>
+        </linearGradient>
+        <radialGradient id="hcf" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#1A1D36"/>
+          <stop offset="100%" stop-color="#0D0B1E"/>
+        </radialGradient>
+        <radialGradient id="hglow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#6B7FD4" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#00C9B1" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="horG" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00C9B1" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#9B6FD4" stop-opacity="0.2"/>
+        </linearGradient>
+      </defs>
+      <!-- glow -->
+      <circle cx="70" cy="70" r="68" fill="url(#hglow)"/>
+      <!-- outer ring -->
+      <circle cx="70" cy="70" r="64" fill="none" stroke="url(#horG)" stroke-width="1"/>
+      <!-- main circle -->
+      <circle cx="70" cy="70" r="58" fill="url(#hcf)" stroke="url(#hl)" stroke-width="2"/>
+      <!-- teardrop outer -->
+      <path d="M70 24 C82 31 92 44 92 57 C92 72 82 82 70 86 C58 82 48 72 48 57 C48 44 58 31 70 24Z"
+        fill="url(#hlv)" opacity="0.15"/>
+      <path d="M70 24 C82 31 92 44 92 57 C92 72 82 82 70 86 C58 82 48 72 48 57 C48 44 58 31 70 24Z"
+        fill="none" stroke="url(#hlv)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- teardrop inner hollow -->
+      <path d="M70 38 C79 44 86 53 86 62 C86 72 79 79 70 82 C61 79 54 72 54 62 C54 53 61 44 70 38Z"
+        fill="url(#hcf)"/>
+      <path d="M70 38 C79 44 86 53 86 62 C86 72 79 79 70 82 C61 79 54 72 54 62 C54 53 61 44 70 38Z"
+        fill="none" stroke="url(#hlv)" stroke-width="1.5" opacity="0.4"/>
+      <!-- stem -->
+      <line x1="70" y1="86" x2="70" y2="97" stroke="url(#hlv)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- collar -->
+      <line x1="60" y1="97" x2="80" y2="97" stroke="url(#hlv)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- dish top curved -->
+      <path d="M52 106 Q70 100 88 106" fill="none" stroke="url(#hl)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- dish bottom flat -->
+      <line x1="52" y1="113" x2="88" y2="113" stroke="url(#hl)" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Available 24/7 on WhatsApp
+  </div>
+
+  <h1 class="hero-h1">Your light,<br><em>always with you</em></h1>
+
+  <p class="hero-sub">Spiritual guidance and emotional support through WhatsApp — shaped by your beliefs, present in any moment, free from judgement.</p>
+
+  <div class="hero-actions">
+    <a href="#register" class="btn-primary">Start for free →</a>
+    <button class="btn-ghost" onclick="document.getElementById('conversations').scrollIntoView({behavior:'smooth'})">See how it works</button>
+  </div>
+
+  <div class="paths">
+    <div class="path-pill"><span class="path-dot" style="background:#00C9B1"></span>Christianity</div>
+    <div class="path-pill"><span class="path-dot" style="background:#9B6FD4"></span>Islam</div>
+    <div class="path-pill"><span class="path-dot" style="background:#6B7FD4"></span>Judaism</div>
+    <div class="path-pill"><span class="path-dot" style="background:#00C9B1"></span>Hinduism</div>
+    <div class="path-pill"><span class="path-dot" style="background:#9B6FD4"></span>Buddhism</div>
+    <div class="path-pill"><span class="path-dot" style="background:#6B7FD4"></span>Spiritual</div>
+    <div class="path-pill"><span class="path-dot" style="background:rgba(255,255,255,0.4)"></span>Interfaith</div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat"><span class="stat-num">7</span><span class="stat-label">Faith traditions</span></div>
+  <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">Always available</span></div>
+  <div class="stat"><span class="stat-num">&lt;5s</span><span class="stat-label">Response time</span></div>
+  <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Private & secure</span></div>
+  <div class="stat"><span class="stat-num">0</span><span class="stat-label">App downloads needed</span></div>
+</div>
+
+<!-- ============================================================
+     FEATURES
+============================================================ -->
+<section id="features">
+  <div class="section reveal">
+    <span class="eyebrow">What we offer</span>
+    <h2 class="section-h">Support that feels human</h2>
+    <p class="section-sub">No cold chatbot. No religious lectures. Genuine, warm guidance — whenever you need it.</p>
+
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">🌿</div>
+        <h3>Faith-aligned, not faith-forced</h3>
+        <p>You choose your belief system and Lamplighter adapts entirely. The language, scripture, and tone — all shaped by what you believe.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">💬</div>
+        <h3>Just send a WhatsApp</h3>
+        <p>No new app. No account to manage. No learning curve. The app you already have, now also a source of peace.</p>
+      </div>
+      <div class="feat-card wide reveal">
+        <div>
+          <div class="feat-icon">🌙</div>
+          <h3>Present at 3am and at 3pm</h3>
+          <p>Panic attacks don't wait for office hours. Neither does Lamplighter. Whether it's grief, anxiety, purpose, or just a heavy moment — message anytime and receive a thoughtful, personal response within seconds.</p>
+          <br>
+          <p style="font-size:14px;color:var(--text-soft)">Average response time: <strong style="color:var(--teal)">under 5 seconds</strong></p>
+        </div>
+        <div class="mini-chat">
+          <div class="mini-chat-top">
+            <div class="mini-chat-avatar">
+              <svg width="16" height="18" viewBox="0 0 36 40">
+                <path d="M18 2 C24 6 30 13 30 20 C30 28 24 34 18 36 C12 34 6 28 6 20 C6 13 12 6 18 2Z" fill="rgba(255,255,255,0.9)"/>
+                <path d="M18 10 C22 13 26 17 26 21 C26 26 22 30 18 31 C14 30 10 26 10 21 C10 17 14 13 18 10Z" fill="rgba(11,12,24,0.8)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="mini-chat-name">Lamplighter</div>
+              <div class="mini-chat-online">● Online now</div>
+            </div>
+          </div>
+          <div class="mini-chat-body">
+            <div class="bubble-in">I can't sleep. Everything feels like too much right now.</div>
+            <div class="bubble-out">That's real and I hear you. The night makes everything heavier. You don't have to solve it — just breathe. I'm here. What's weighing on you most? 🕯️</div>
+            <div class="bubble-in">My relationship. I don't know if I'm making the right choice.</div>
+            <div class="bubble-out">Sit with that uncertainty — it usually contains information. What does your gut say, separate from what your head is arguing?</div>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔒</div>
+        <h3>Private. Fully yours.</h3>
+        <p>Encrypted conversations. Never sold. No ads. No profiling. A private space that belongs entirely to you.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">✨</div>
+        <h3>Not therapy. Not a sermon.</h3>
+        <p>Between a wise friend and a spiritual guide. Empathetic, grounding, completely judgement-free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CONVERSATIONS
+============================================================ -->
+<section id="conversations" class="convo-section">
+  <span class="eyebrow">Live conversations</span>
+  <h2 class="section-h" style="margin-bottom:14px">See it in practice</h2>
+  <p class="section-sub">Real situations. Real responses. Different paths, same care.</p>
+
+  <div class="convo-inner">
+    <div class="tab-row">
+      <button class="tab active" onclick="setTab(this,'p-grief')">Grief</button>
+      <button class="tab" onclick="setTab(this,'p-anxiety')">Anxiety</button>
+      <button class="tab" onclick="setTab(this,'p-purpose')">Purpose</button>
+      <button class="tab" onclick="setTab(this,'p-christian')">Christian</button>
+      <button class="tab" onclick="setTab(this,'p-muslim')">Muslim</button>
+    </div>
+
+    <div class="phone-shell">
+      <div class="phone-bar">
+        <div class="phone-avatar">
+          <svg width="18" height="20" viewBox="0 0 36 40">
+            <path d="M18 2 C24 6 30 13 30 20 C30 28 24 34 18 36 C12 34 6 28 6 20 C6 13 12 6 18 2Z" fill="rgba(255,255,255,0.9)"/>
+            <path d="M18 10 C22 13 26 17 26 21 C26 26 22 30 18 31 C14 30 10 26 10 21 C10 17 14 13 18 10Z" fill="rgba(11,12,24,0.8)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="phone-info-name">Lamplighter</div>
+          <div class="phone-info-status">● Online now</div>
+        </div>
+      </div>
+
+      <div class="phone-msgs">
+        <div id="p-grief" class="convo-panel active">
+          <div class="msg-in">My dad passed last month. I still reach for my phone to call him.</div>
+          <div class="msg-out">That instinct — reaching for the phone — shows how alive the relationship still is in you. You don't have to stop missing him.<br><br>What was something he always said to you?</div>
+          <div class="msg-in">He always said "just keep going, kid." Even when everything was hard.</div>
+          <div class="msg-out">He's still saying it. Through you, right now, choosing to keep going. That's not gone. 🕯️</div>
+        </div>
+        <div id="p-anxiety" class="convo-panel">
+          <div class="msg-in">I have a huge presentation tomorrow and I can't stop spiralling.</div>
+          <div class="msg-out">First — breathe. In for 4 counts, hold for 4, out for 6. Right now, with me.<br><br>Your mind is trying to protect you. It's just being too loud. What's the specific fear underneath the spiral?</div>
+          <div class="msg-in">That I'll freeze and look stupid. That I'll lose everything.</div>
+          <div class="msg-out">That thought is a story, not a prophecy. You've prepared. People remember how you made them feel — not whether you were perfect.<br><br>What's one thing you know really well about this topic?</div>
+        </div>
+        <div id="p-purpose" class="convo-panel">
+          <div class="msg-in">I'm 28 and feel like everyone has it figured out except me.</div>
+          <div class="msg-out">Most people who look like they have it figured out are performing certainty. The ones thriving at 38 asked the hard questions at 28.<br><br>What did you care about before you started comparing?</div>
+          <div class="msg-in">I used to paint. Haven't touched it in 3 years.</div>
+          <div class="msg-out">There's your thread. Not the career — just that. Why did you stop? ✨</div>
+        </div>
+        <div id="p-christian" class="convo-panel">
+          <div class="msg-in">I feel like God is distant. My prayers feel empty.</div>
+          <div class="msg-out">What you're feeling has a name — spiritual dryness. Even the greatest saints wrote about it. St. John of the Cross called it "the dark night of the soul."<br><br>The feeling of distance is not evidence of absence. What were you praying for?</div>
+          <div class="msg-in">Healing for my sister. It's been months.</div>
+          <div class="msg-out">Keep praying. Romans 8:26 — the Spirit intercedes "with groans too deep for words." You don't need perfect prayers. The love behind them is enough. 🙏</div>
+        </div>
+        <div id="p-muslim" class="convo-panel">
+          <div class="msg-in">I've been feeling really guilty. I don't know if Allah can forgive me.</div>
+          <div class="msg-out">Assalamu alaikum. The fact that you feel this guilt speaks to the goodness of your heart.<br><br>The Quran is clear: "Do not despair of the mercy of Allah. Indeed, Allah forgives all sins." (39:53)<br><br>What would it mean to you to feel forgiven?</div>
+          <div class="msg-in">It would mean I could start fresh. Stop carrying this.</div>
+          <div class="msg-out">That fresh start is available to you. Not eventually — now. What is one small act of goodness you could offer today? 🌿</div>
+        </div>
+      </div>
+
+      <div class="phone-input-row">
+        <div class="phone-input-box">Share what's on your mind…</div>
+        <div class="phone-send-btn">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HOW IT WORKS
+============================================================ -->
+<section id="how">
+  <div class="section reveal">
+    <span class="eyebrow">The process</span>
+    <h2 class="section-h">Up and running in 60 seconds</h2>
+    <p class="section-sub">Three steps between you and your first conversation</p>
+
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <span class="step-num">01</span>
+        <div class="step-icon">📋</div>
+        <h3>Register your path</h3>
+        <p>Tell us your name, WhatsApp number, and belief system. 60 seconds — no app download required.</p>
+      </div>
+      <div class="step-card reveal">
+        <span class="step-num">02</span>
+        <div class="step-icon">💬</div>
+        <h3>Message freely</h3>
+        <p>When something weighs on you, just message. No formatting needed — just speak like you would to a trusted friend.</p>
+      </div>
+      <div class="step-card reveal">
+        <span class="step-num">03</span>
+        <div class="step-icon">✨</div>
+        <h3>Receive your light</h3>
+        <p>A thoughtful, faith-aligned response arrives in seconds. Not generic — a moment of genuine care, shaped for you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TESTIMONIALS
+============================================================ -->
+<section>
+  <div class="section reveal">
+    <span class="eyebrow">What people say</span>
+    <h2 class="section-h" style="margin-bottom:14px">Real people. Real moments.</h2>
+    <p class="section-sub" style="margin-bottom:48px">From those who reached out when it mattered most</p>
+
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"I messaged at 2am not expecting much. I felt genuinely heard for the first time in weeks. Not judged. Not given a script. Just met where I was."</blockquote>
+        <div class="testi-author">
+          <div class="testi-av" style="background:var(--teal-dim);color:var(--teal)">NK</div>
+          <div><div class="testi-name">Nomsa K.</div><div class="testi-meta">Christian · Johannesburg</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"As a Muslim I worried it would feel generic. It wasn't. It cited the Quran correctly and responded with the kind of understanding I'd expect from a scholar."</blockquote>
+        <div class="testi-author">
+          <div class="testi-av" style="background:var(--violet-dim);color:var(--violet)">AR</div>
+          <div><div class="testi-name">Ahmed R.</div><div class="testi-meta">Islam · Cape Town</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote>"I'm not traditionally religious but needed something more than therapy and less than a preacher. Lamplighter is exactly that space."</blockquote>
+        <div class="testi-author">
+          <div class="testi-av" style="background:rgba(107,127,212,0.12);color:var(--mid)">SM</div>
+          <div><div class="testi-name">Sarah M.</div><div class="testi-meta">Spiritual · Durban</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     REGISTER
+============================================================ -->
+<section id="register" class="reg-section">
+  <span class="eyebrow" style="display:block;text-align:center;margin-bottom:14px">Get started</span>
+  <h2 class="section-h" style="margin-bottom:10px">Find your light today</h2>
+  <p class="section-sub" style="margin-bottom:48px">Free to start. Always on. Always yours.</p>
+
+  <div class="reg-card">
+    <div id="the-form">
+      <div class="reg-title">Create your account</div>
+      <p class="reg-sub">60 seconds to your first conversation</p>
+
+      <form onsubmit="handleSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Your name</label>
+          <input id="f-name" type="text" class="form-input" placeholder="What should we call you?" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">WhatsApp number</label>
+          <div class="phone-row">
+            <input id="f-prefix" type="text" class="form-input prefix" value="+27">
+            <input id="f-phone" type="tel" class="form-input" placeholder="82 345 6789" required style="flex:1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your path</label>
+          <div class="belief-grid" id="belief-grid">
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'christian')">🕊️ Christianity</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'muslim')">☪️ Islam</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'jewish')">✡️ Judaism</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'hindu')">🕉️ Hinduism</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'buddhist')">☸️ Buddhism</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'spiritual')">✨ Spiritual</button>
+            <button type="button" class="belief-btn" onclick="pickBelief(this,'interfaith')" style="grid-column:span 2">🌍 Interfaith / Still exploring</button>
+          </div>
+          <input type="hidden" id="f-belief">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span style="opacity:0.4;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="f-email" type="email" class="form-input" placeholder="your@email.com">
+        </div>
+
+        <div class="consent-row">
+          <input type="checkbox" class="consent-check" id="f-consent" required>
+          <label for="f-consent" class="consent-text">
+            I understand Lamplighter provides spiritual and emotional support — not professional therapy or medical advice. I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="sub-btn">Start my journey →</button>
+
+        <div class="trust-row">
+          <span class="trust-item">🔒 End-to-end private</span>
+          <span class="trust-item">🚫 No spam</span>
+          <span class="trust-item">✅ Free to start</span>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-success" id="form-success">
+      <div class="success-icon">🕯️</div>
+      <div class="success-h">Your light is on</div>
+      <p class="success-p">Welcome, <span id="s-name"></span>! Check WhatsApp — your first message is on its way. We're with you now, whenever you need us.</p>
+      <br>
+      <p style="font-size:13px;color:var(--text-soft)">Didn't receive it in 5 minutes? Email hello@lamplighter.app</p>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<div class="safety">
+  <div class="safety-inner">
+    <span class="safety-label">A note on wellbeing</span>
+    <p class="safety-text">Lamplighter is a spiritual and emotional support companion — not a replacement for professional mental health care. Our responses are never medical advice.</p>
+    <div class="safety-box">
+      <strong style="color:var(--teal)">South Africa:</strong> SADAG 0800 567 567 &nbsp;·&nbsp; SMS 31393 &nbsp;·&nbsp; Available 24 hours<br>
+      <strong style="color:var(--teal)">Emergency:</strong> Call 10111 if you are in immediate danger
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" style="margin-bottom:4px">
+          <svg width="32" height="32" viewBox="0 0 36 36">
+            <defs>
+              <linearGradient id="fl2" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stop-color="#00C9B1"/>
+                <stop offset="100%" stop-color="#9B6FD4"/>
+              </linearGradient>
+            </defs>
+            <circle cx="18" cy="18" r="17" fill="rgba(255,255,255,0.04)" stroke="url(#fl2)" stroke-width="1.5"/>
+            <path d="M18 6 C22 9 26 13 26 18 C26 23 22 27 18 28 C14 27 10 23 10 18 C10 13 14 9 18 6Z" fill="none" stroke="url(#fl2)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M18 11 C21 13 23 16 23 19 C23 22 21 24 18 25 C15 24 13 22 13 19 C13 16 15 13 18 11Z" fill="#0F1020"/>
+            <line x1="18" y1="28" x2="18" y2="31" stroke="url(#fl2)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="14" y1="31" x2="22" y2="31" stroke="url(#fl2)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M11 33.5 Q18 31.5 25 33.5" fill="none" stroke="url(#fl2)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="11" y1="35" x2="25" y2="35" stroke="url(#fl2)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="nav-name" style="font-size:18px">Lamplighter</span>
+        </a>
+        <p>Your light, always with you. Spiritual and emotional support through WhatsApp — for every path, every moment.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#conversations">Conversations</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#register">Get started</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Paths</h5>
+        <ul>
+          <li><a href="#">Christianity</a></li>
+          <li><a href="#">Islam</a></li>
+          <li><a href="#">Judaism</a></li>
+          <li><a href="#">Hinduism</a></li>
+          <li><a href="#">Buddhism</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-legal">© 2025 Lamplighter · Not a therapy service</span>
+      <span class="footer-made">Made with care, for every path 🕯️</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+let belief = '';
+
+function pickBelief(btn, val) {
+  document.querySelectorAll('.belief-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  belief = val;
+  document.getElementById('f-belief').value = val;
+}
+
+function setTab(btn, id) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.convo-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Backend URL — update this to your deployed Railway/Render URL ──
+const API_URL = 'https://your-backend.railway.app';
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  if (!belief) { alert('Please choose your spiritual path to continue.'); return; }
+
+  const name   = document.getElementById('f-name').value.trim();
+  const prefix = document.getElementById('f-prefix').value.trim();
+  const phone  = prefix + document.getElementById('f-phone').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const btn    = document.getElementById('sub-btn');
+
+  btn.textContent = 'Lighting your lamp…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/api/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, belief, email })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+    document.getElementById('the-form').style.display = 'none';
+    document.getElementById('form-success').classList.add('show');
+    document.getElementById('s-name').textContent = name.split(' ')[0];
+
+  } catch (err) {
+    btn.textContent = 'Start my journey →';
+    btn.disabled = false;
+    alert(err.message || 'Could not connect. Please try again.');
+  }
+}
+
+// ── Service Worker (PWA) ──────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW failed:', err));
+  });
+}
+
+// ── PWA Install prompt ────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 30s
+  setTimeout(() => showInstallBanner(), 30000);
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  const banner = document.createElement('div');
+  banner.style.cssText = `
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(135deg,#00C9B1,#9B6FD4);
+    color:#0B0C18; padding:14px 24px; border-radius:100px;
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:14px;
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+    box-shadow:0 8px 32px rgba(0,201,177,0.3); z-index:9998;
+  `;
+  banner.innerHTML = `🕯️ Add Lamplighter to your home screen <span style="opacity:0.7;font-weight:400">×</span>`;
+  banner.onclick = async () => {
+    banner.remove();
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  };
+  document.body.appendChild(banner);
+}
+
+/* Scroll reveal */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* Nav shadow on scroll */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.boxShadow =
+    window.scrollY > 40 ? '0 1px 32px rgba(0,0,0,0.4)' : 'none';
+});
+</script>
+</body>
+</html>
