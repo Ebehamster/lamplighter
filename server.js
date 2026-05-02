@@ -3,7 +3,16 @@
 // Stack: Node.js + Express + Supabase + Twilio + OpenAI
 // =====const express = require('express');
 const path = require('path');
-const app = express();
+const app = express();const app = express();
+
+// Allow Netlify to talk to Railway
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname)));
