@@ -1,1 +1,11 @@
-{"name":"lamplighter","version":"1.0.0","scripts":{"start":"node server.js"},"dependencies":{"@supabase/supabase-js":"^2.105.1","express":"^4.22.1"}}
+{
+    "name": "lamplighter",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.105.1",
+        "express": "^4.22.1","twilio": "^4.23.0"
+    }
+}
