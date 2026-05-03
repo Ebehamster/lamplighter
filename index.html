@@ -1244,7 +1244,7 @@ function setTab(btn, id) {
 }
 
 // ── Backend URL — update this to your deployed Railway/Render URL ──
-const API_URL = 'https://lamplighter-production.up.railway.app';
+const API_URL = '';
 
 async function handleSubmit(e) {
   e.preventDefault();
@@ -1260,7 +1260,7 @@ async function handleSubmit(e) {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`${API_URL}/api/register`, {
+   const res = await fetch('/.netlify/functions/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, phone, belief, email })
