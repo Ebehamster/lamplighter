@@ -42,9 +42,12 @@ exports.handler = async (event) => {
 
     if (existing) {
       console.log('Returning user — calling Twilio for', cleanPhone);
-      sendWelcomeWhatsApp(cleanPhone, name, belief, true)
-        .then(msg => console.log('Twilio SUCCESS (returning):', msg.sid, 'status:', msg.status))
-        .catch(err => console.error('Twilio (welcome back) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo));
+      try {
+        const msg = await sendWelcomeWhatsApp(cleanPhone, name, belief, true);
+        console.log('Twilio SUCCESS (returning):', msg.sid, 'status:', msg.status);
+      } catch (err) {
+        console.error('Twilio (welcome back) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo);
+      }
 
       return {
         statusCode: 200,
@@ -58,17 +61,14 @@ exports.handler = async (event) => {
 
     if (error) throw error;
 
-  console.log('Returning user — calling Twilio for', cleanPhone);
-try {
-  const msg = await sendWelcomeWhatsApp(cleanPhone, name, belief, true);
-  console.log('Twilio SUCCESS (returning):', msg.sid, 'status:', msg.status);
-} catch (err) {
-  console.error('Twilio (welcome back) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo);
-}console.log('New user — calling Twilio for', cleanPhone);
-sendWelcomeWhatsApp(cleanPhone, name, belief, false)
-  .then(msg => console.log('Twilio SUCCESS (new):', msg.sid, 'status:', msg.status))
-  .catch(err => console.error('Twilio (new user) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo));
-  
+    console.log('New user — calling Twilio for', cleanPhone);
+    try {
+      const msg = await sendWelcomeWhatsApp(cleanPhone, name, belief, false);
+      console.log('Twilio SUCCESS (new):', msg.sid, 'status:', msg.status);
+    } catch (err) {
+      console.error('Twilio (new user) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo);
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true, message: 'Registered!' })
