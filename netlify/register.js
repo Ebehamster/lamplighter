@@ -1,14 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
-const twilio = require('twilio');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
-);
-
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
 );
 
 exports.handler = async (event) => {
@@ -29,24 +23,17 @@ exports.handler = async (event) => {
     const cleanPhone = phone.replace(/\s+/g, '').replace(/^0/, '+27');
 
     console.log('REGISTER START. cleanPhone:', cleanPhone, 'belief:', belief);
-    console.log('ENV CHECK:', {
-      SUPABASE_URL: !!process.env.SUPABASE_URL,
-      SUPABASE_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_KEY,
-      TWILIO_ACCOUNT_SID: !!process.env.TWILIO_ACCOUNT_SID,
-      TWILIO_AUTH_TOKEN: !!process.env.TWILIO_AUTH_TOKEN,
-      TWILIO_WHATSAPP_NUMBER: process.env.TWILIO_WHATSAPP_NUMBER
-    });
 
     const { data: existing } = await supabase
       .from('users').select('*').eq('phone', cleanPhone).single();
 
     if (existing) {
-      console.log('Returning user — calling Twilio for', cleanPhone);
+      console.log('Returning user — sending Twilio for', cleanPhone);
       try {
-        const msg = await sendWelcomeWhatsApp(cleanPhone, name, belief, true);
-        console.log('Twilio SUCCESS (returning):', msg.sid, 'status:', msg.status);
+        const result = await sendWelcomeWhatsApp(cleanPhone, name, belief, true);
+        console.log('Twilio SUCCESS (returning):', result.sid, 'status:', result.status);
       } catch (err) {
-        console.error('Twilio (welcome back) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo);
+        console.error('Twilio (welcome back) FAILED:', err.message);
       }
 
       return {
@@ -61,12 +48,12 @@ exports.handler = async (event) => {
 
     if (error) throw error;
 
-    console.log('New user — calling Twilio for', cleanPhone);
+    console.log('New user — sending Twilio for', cleanPhone);
     try {
-      const msg = await sendWelcomeWhatsApp(cleanPhone, name, belief, false);
-      console.log('Twilio SUCCESS (new):', msg.sid, 'status:', msg.status);
+      const result = await sendWelcomeWhatsApp(cleanPhone, name, belief, false);
+      console.log('Twilio SUCCESS (new):', result.sid, 'status:', result.status);
     } catch (err) {
-      console.error('Twilio (new user) FAILED:', err.message, 'code:', err.code, 'info:', err.moreInfo);
+      console.error('Twilio (new user) FAILED:', err.message);
     }
 
     return {
@@ -89,11 +76,35 @@ async function sendWelcomeWhatsApp(phone, name, belief, isReturning) {
     ? `Welcome back, ${firstName}. 🕯️\n\nYour light is still here, waiting. Whenever you're ready, just send a message — I'm with you.`
     : `Hi ${firstName}, this is Lamplighter. 🕯️\n\nYour light is on. I'm here whenever you need a moment of calm, reflection, or quiet support — shaped by your ${belief} path.\n\nWhen you're ready, send me a message. I'm listening.`;
 
-  console.log('Twilio API call: from', process.env.TWILIO_WHATSAPP_NUMBER, 'to', `whatsapp:${phone}`);
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_WHATSAPP_NUMBER;
 
-  return twilioClient.messages.create({
-    from: process.env.TWILIO_WHATSAPP_NUMBER,
-    to: `whatsapp:${phone}`,
-    body
+  const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+
+  const params = new URLSearchParams();
+  params.append('From', from);
+  params.append('To', `whatsapp:${phone}`);
+  params.append('Body', body);
+
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
+
+  console.log('Twilio fetch: from', from, 'to', `whatsapp:${phone}`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params.toString()
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Twilio ${response.status}: ${data.message || JSON.stringify(data)}`);
+  }
+
+  return data;
 }
